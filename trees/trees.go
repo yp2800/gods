@@ -9,13 +9,14 @@
 // Reference: https://en.wikipedia.org/wiki/Tree_%28data_structure%29
 package trees
 
-import "github.com/emirpasic/gods/containers"
+import "github.com/emirpasic/gods/v2/containers"
 
 // Tree interface that all trees implement
-type Tree interface {
-	containers.Container
+type Tree[V any] interface {
+	containers.Container[V]
 	// Empty() bool
 	// Size() int
 	// Clear()
 	// Values() []interface{}
+	// String() string
 }

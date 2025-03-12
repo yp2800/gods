@@ -6,34 +6,31 @@ package arraylist
 
 import (
 	"encoding/json"
-	"github.com/emirpasic/gods/containers"
+
+	"github.com/emirpasic/gods/v2/containers"
 )
 
-func assertSerializationImplementation() {
-	var _ containers.JSONSerializer = (*List)(nil)
-	var _ containers.JSONDeserializer = (*List)(nil)
-}
+// Assert Serialization implementation
+var _ containers.JSONSerializer = (*List[int])(nil)
+var _ containers.JSONDeserializer = (*List[int])(nil)
 
 // ToJSON outputs the JSON representation of list's elements.
-func (list *List) ToJSON() ([]byte, error) {
-	return json.Marshal(list.elements[:list.size])
+func (list *List[T]) ToJSON() ([]byte, error) {
+	return json.Marshal(list.elements)
 }
 
 // FromJSON populates list's elements from the input JSON representation.
-func (list *List) FromJSON(data []byte) error {
+func (list *List[T]) FromJSON(data []byte) error {
 	err := json.Unmarshal(data, &list.elements)
-	if err == nil {
-		list.size = len(list.elements)
-	}
 	return err
 }
 
 // UnmarshalJSON @implements json.Unmarshaler
-func (list *List) UnmarshalJSON(bytes []byte) error {
+func (list *List[T]) UnmarshalJSON(bytes []byte) error {
 	return list.FromJSON(bytes)
 }
 
 // MarshalJSON @implements json.Marshaler
-func (list *List) MarshalJSON() ([]byte, error) {
+func (list *List[T]) MarshalJSON() ([]byte, error) {
 	return list.ToJSON()
 }

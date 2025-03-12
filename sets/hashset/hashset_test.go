@@ -6,6 +6,7 @@ package hashset
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func TestSetNew(t *testing.T) {
 }
 
 func TestSetAdd(t *testing.T) {
-	set := New()
+	set := New[int]()
 	set.Add()
 	set.Add(1)
 	set.Add(2)
@@ -42,7 +43,7 @@ func TestSetAdd(t *testing.T) {
 }
 
 func TestSetContains(t *testing.T) {
-	set := New()
+	set := New[int]()
 	set.Add(3, 1, 2)
 	set.Add(2, 3)
 	set.Add()
@@ -61,7 +62,7 @@ func TestSetContains(t *testing.T) {
 }
 
 func TestSetRemove(t *testing.T) {
-	set := New()
+	set := New[int]()
 	set.Add(3, 1, 2)
 	set.Remove()
 	if actualValue := set.Size(); actualValue != 3 {
@@ -81,7 +82,7 @@ func TestSetRemove(t *testing.T) {
 }
 
 func TestSetSerialization(t *testing.T) {
-	set := New()
+	set := New[string]()
 	set.Add("a", "b", "c")
 
 	var err error
@@ -109,11 +110,25 @@ func TestSetSerialization(t *testing.T) {
 	if err != nil {
 		t.Errorf("Got error %v", err)
 	}
+
+	err = json.Unmarshal([]byte(`["a","b","c"]`), &set)
+	if err != nil {
+		t.Errorf("Got error %v", err)
+	}
+	assert()
+}
+
+func TestSetString(t *testing.T) {
+	c := New[int]()
+	c.Add(1)
+	if !strings.HasPrefix(c.String(), "HashSet") {
+		t.Errorf("String should start with container name")
+	}
 }
 
 func TestSetIntersection(t *testing.T) {
-	set := New()
-	another := New()
+	set := New[string]()
+	another := New[string]()
 
 	intersection := set.Intersection(another)
 	if actualValue, expectedValue := intersection.Size(), 0; actualValue != expectedValue {
@@ -134,8 +149,8 @@ func TestSetIntersection(t *testing.T) {
 }
 
 func TestSetUnion(t *testing.T) {
-	set := New()
-	another := New()
+	set := New[string]()
+	another := New[string]()
 
 	union := set.Union(another)
 	if actualValue, expectedValue := union.Size(), 0; actualValue != expectedValue {
@@ -156,8 +171,8 @@ func TestSetUnion(t *testing.T) {
 }
 
 func TestSetDifference(t *testing.T) {
-	set := New()
-	another := New()
+	set := New[string]()
+	another := New[string]()
 
 	difference := set.Difference(another)
 	if actualValue, expectedValue := difference.Size(), 0; actualValue != expectedValue {
@@ -177,7 +192,7 @@ func TestSetDifference(t *testing.T) {
 	}
 }
 
-func benchmarkContains(b *testing.B, set *Set, size int) {
+func benchmarkContains(b *testing.B, set *Set[int], size int) {
 	for i := 0; i < b.N; i++ {
 		for n := 0; n < size; n++ {
 			set.Contains(n)
@@ -185,7 +200,7 @@ func benchmarkContains(b *testing.B, set *Set, size int) {
 	}
 }
 
-func benchmarkAdd(b *testing.B, set *Set, size int) {
+func benchmarkAdd(b *testing.B, set *Set[int], size int) {
 	for i := 0; i < b.N; i++ {
 		for n := 0; n < size; n++ {
 			set.Add(n)
@@ -193,7 +208,7 @@ func benchmarkAdd(b *testing.B, set *Set, size int) {
 	}
 }
 
-func benchmarkRemove(b *testing.B, set *Set, size int) {
+func benchmarkRemove(b *testing.B, set *Set[int], size int) {
 	for i := 0; i < b.N; i++ {
 		for n := 0; n < size; n++ {
 			set.Remove(n)
@@ -204,7 +219,7 @@ func benchmarkRemove(b *testing.B, set *Set, size int) {
 func BenchmarkHashSetContains100(b *testing.B) {
 	b.StopTimer()
 	size := 100
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
@@ -215,7 +230,7 @@ func BenchmarkHashSetContains100(b *testing.B) {
 func BenchmarkHashSetContains1000(b *testing.B) {
 	b.StopTimer()
 	size := 1000
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
@@ -226,7 +241,7 @@ func BenchmarkHashSetContains1000(b *testing.B) {
 func BenchmarkHashSetContains10000(b *testing.B) {
 	b.StopTimer()
 	size := 10000
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
@@ -237,7 +252,7 @@ func BenchmarkHashSetContains10000(b *testing.B) {
 func BenchmarkHashSetContains100000(b *testing.B) {
 	b.StopTimer()
 	size := 100000
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
@@ -248,7 +263,7 @@ func BenchmarkHashSetContains100000(b *testing.B) {
 func BenchmarkHashSetAdd100(b *testing.B) {
 	b.StopTimer()
 	size := 100
-	set := New()
+	set := New[int]()
 	b.StartTimer()
 	benchmarkAdd(b, set, size)
 }
@@ -256,7 +271,7 @@ func BenchmarkHashSetAdd100(b *testing.B) {
 func BenchmarkHashSetAdd1000(b *testing.B) {
 	b.StopTimer()
 	size := 1000
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
@@ -267,7 +282,7 @@ func BenchmarkHashSetAdd1000(b *testing.B) {
 func BenchmarkHashSetAdd10000(b *testing.B) {
 	b.StopTimer()
 	size := 10000
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
@@ -278,7 +293,7 @@ func BenchmarkHashSetAdd10000(b *testing.B) {
 func BenchmarkHashSetAdd100000(b *testing.B) {
 	b.StopTimer()
 	size := 100000
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
@@ -289,7 +304,7 @@ func BenchmarkHashSetAdd100000(b *testing.B) {
 func BenchmarkHashSetRemove100(b *testing.B) {
 	b.StopTimer()
 	size := 100
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
@@ -300,7 +315,7 @@ func BenchmarkHashSetRemove100(b *testing.B) {
 func BenchmarkHashSetRemove1000(b *testing.B) {
 	b.StopTimer()
 	size := 1000
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
@@ -311,7 +326,7 @@ func BenchmarkHashSetRemove1000(b *testing.B) {
 func BenchmarkHashSetRemove10000(b *testing.B) {
 	b.StopTimer()
 	size := 10000
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
@@ -322,7 +337,7 @@ func BenchmarkHashSetRemove10000(b *testing.B) {
 func BenchmarkHashSetRemove100000(b *testing.B) {
 	b.StopTimer()
 	size := 100000
-	set := New()
+	set := New[int]()
 	for n := 0; n < size; n++ {
 		set.Add(n)
 	}
